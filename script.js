@@ -2,19 +2,19 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-function App() {
-  const [accessToken, setAccessToken] = useState('');
+
+const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [albums, setAlbums] = useState([]);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [accessToken, setAccessToken] = useState('');
 
-  // Fetch access token from Spotify API
+  // Step 1: Get Access Token
   useEffect(() => {
     const getAccessToken = async () => {
       const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
       const clientSecret = process.env.REACT_APP_SPOTIFY_CLIENT_SECRET;
       const encodedCredentials = btoa(`${clientId}:${clientSecret}`);
-
+      
       try {
         const response = await axios.post(
           'https://accounts.spotify.com/api/token',
@@ -26,20 +26,18 @@ function App() {
             },
           }
         );
-        setAccessToken(response.data.access_token); // Store access token
-        setLoading(false); // Set loading to false once token is fetched
+        setAccessToken(response.data.access_token); // Store the access token
       } catch (error) {
         console.error('Error fetching access token:', error);
-        setLoading(false);
       }
     };
 
     getAccessToken();
-  }, []);
+  }, []); // Only run once when the component mounts
 
-  // Search for albums from Spotify API
+  // Step 2: Fetch Albums
   const searchAlbums = async () => {
-    if (!accessToken || !searchQuery) return;
+    if (!searchQuery) return; // Avoid searching when the query is empty
 
     try {
       const response = await axios.get(
@@ -50,45 +48,24 @@ function App() {
           },
         }
       );
-      setAlbums(response.data.albums.items); // Store albums in state
+      setAlbums(response.data.albums.items); // Update albums state
     } catch (error) {
       console.error('Error fetching albums:', error);
     }
   };
 
-  // Handle search input change
-  const handleSearchInput = (event) => {
-    setSearchQuery(event.target.value);
-  };
-
-  // Handle search button click
-  const handleSearchButtonClick = () => {
-    searchAlbums();
-  };
-
-  // Check if the token is still loading
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div className="App">
-      <h1>Spotify Album Finder 🎶</h1>
+      <h1>Spotify Album Finder</h1>
+      <input
+        type="text"
+        placeholder="Enter artist or album name"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)} // Update the search query
+      />
+      <button onClick={searchAlbums}>Search</button>
 
-      <div className="search-bar">
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Enter artist or album name"
-          value={searchQuery}
-          onChange={handleSearchInput}
-        />
-        <button id="searchButton" onClick={handleSearchButtonClick}>
-          Search
-        </button>
-      </div>
-
-      <div id="results" className="results">
+      <div className="album-list">
         {albums.length === 0 ? (
           <p>No albums found. Try searching for something else!</p>
         ) : (
@@ -108,6 +85,6 @@ function App() {
       </div>
     </div>
   );
-}
+};
 
 export default App;
