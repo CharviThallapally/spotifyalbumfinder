@@ -1,4 +1,4 @@
-🎶 Spotify Album Finder
+## 🎶 Spotify Album Finder
 
 A React web app that allows users to search for albums using the Spotify API.
 Built with React, fetch API, and styled with soft colors for a clean, minimal look.
